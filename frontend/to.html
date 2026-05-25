@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel TO</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+    body { font-family: Arial; background: #f4f6f8; padding: 30px; }
+    .container { max-width: 600px; margin:auto; background:white; padding:25px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,0.08);}
+    input {padding:10px; margin:5px 0; width:100%; border-radius:6px; border:1px solid #ccc;}
+    button {padding:10px 20px; margin:5px 0; border:none; border-radius:6px; background:#1f6feb; color:white; cursor:pointer;}
+    button:hover{background:#1557bd;}
+    h2 {margin-top:20px;}
+    .mensaje {margin-top:10px; font-weight:bold;}
+    </style>
+</head>
+<body>
+<div id="app" class="container" v-if="autorizado">
+    <h1>Panel TO</h1>
+
+    <h2>Actualizar Puntuación</h2>
+    <input type="text" v-model="actualizar.tag" placeholder="Tag del jugador">
+    <input type="number" v-model.number="actualizar.puntos" placeholder="Puntos a sumar">
+    <button @click="sumarPuntos">Actualizar</button>
+    <p class="mensaje">{{ mensajeActualizar }}</p>
+
+    <h2>Borrar Jugador</h2>
+    <input type="text" v-model="borrar.tag" placeholder="Tag del jugador">
+    <button @click="borrarJugador">Borrar</button>
+    <p class="mensaje">{{ mensajeBorrar }}</p>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data(){
+    return {
+        autorizado:false,
+        password:"",
+        mensaje:"",
+        actualizar: { tag:"", puntos:0 },
+        borrar: { tag:"" },
+        mensajeActualizar:"",
+        mensajeBorrar:""
+    };
+},
+methods:{
+    verificarPassword(){
+        if(this.password==="virtualizacion123"){
+            this.autorizado=true;
+        }else{
+            this.mensaje="Contraseña incorrecta";
+        }
+    },
+    async sumarPuntos(){
+        try{
+            const resp=await fetch("/api/jugadores/actualizar",{
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body:JSON.stringify(this.actualizar)
+            });
+            const data=await resp.json();
+            if(!resp.ok){
+                this.mensajeActualizar=data.error;
+                return;
+            }
+            this.mensajeActualizar=data.message;
+            this.actualizar={tag:"", puntos:0};
+        }catch(e){
+            this.mensajeActualizar="Error al comunicarse con backend";
+            console.error(e);
+        }
+    },
+    async borrarJugador(){
+        try{
+            const resp=await fetch("/api/jugadores/borrar",{
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body:JSON.stringify(this.borrar)
+            });
+            const data=await resp.json();
+            if(!resp.ok){
+                this.mensajeBorrar=data.error;
+                return;
+            }
+            this.mensajeBorrar=data.message;
+            this.borrar={tag:""};
+        }catch(e){
+            this.mensajeBorrar="Error al comunicarse con backend";
+            console.error(e);
+        }
+    }
+}
+}).mount("#app");
+</script>
+</body>
+</html>

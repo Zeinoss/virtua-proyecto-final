@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Rankings de Jugadores</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 30px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        text-align: center;
+        color: #222;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    input {
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    button {
+        padding: 12px 20px;
+        border: none;
+        background: #1f6feb;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1557bd;
+    }
+
+    .mensaje {
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background: #f0f0f0;
+    }
+
+    .empty {
+        text-align: center;
+        color: #777;
+        margin-top: 25px;
+    }
+</style>
+</head>
+<body>
+    <div id="app" class="container">
+    <h1>Rankings de Jugadores</h1>
+
+    <table v-if="jugadores.length > 0">
+    <thead>
+        <tr>
+        <th>Nombre</th>
+        <th>Tag</th>
+        <th>Ciudad</th>
+        <th>Main</th>
+        <th>Puntuación</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr v-for="jugador in jugadores" :key="jugador.id">
+        <td>{{ jugador.nombre }}</td>
+        <td>{{ jugador.tag }}</td>
+        <td>{{ jugador.ciudad }}</td>
+        <td>{{ jugador.main }}</td>
+        <td>{{ jugador.puntuacion }}</td>
+        </tr>
+    </tbody>
+    </table>
+
+    <p v-else class="empty">Aún no hay registros guardados.</p>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+    data() {
+        return { jugadores: [] };
+    },
+    mounted() {
+        this.cargarJugadores();
+    },
+    methods: {
+        async cargarJugadores() {
+            try {
+            const respuesta = await fetch("/api/jugadores");
+            const data = await respuesta.json();
+            // Ordenamos por puntuación descendente
+            this.jugadores = data.sort((a, b) => b.puntuacion - a.puntuacion);
+        } catch (error) {
+            console.error("Error al cargar jugadores:", error);
+        }
+        }
+    }
+    }).mount("#app");
+    </script>
+</body>
+</html>

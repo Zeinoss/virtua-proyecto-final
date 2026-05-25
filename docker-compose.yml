@@ -1,0 +1,46 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: proyecto_mongo
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - proyecto_network
+
+  backend:
+    build:
+      context: ./backend
+    container_name: proyecto_backend
+    restart: unless-stopped
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      MONGO_USER: admin
+      MONGO_PASSWORD: Admin12345
+      MONGO_DB: proyecto_db
+    depends_on:
+      - mongo
+    networks:
+      - proyecto_network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: proyecto_frontend
+    restart: unless-stopped
+    ports:
+      - "6767:80"
+    depends_on:
+      - backend
+    networks:
+      - proyecto_network
+
+volumes:
+  mongo_data:
+
+networks:
+  proyecto_network:
+    driver: bridge

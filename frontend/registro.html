@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Jugadores</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      background: #1f6feb;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1557bd;
+    }
+
+    .mensaje {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <h1>Registro de Jugadores</h1>
+
+    <div class="form-grid">
+      <input type="text" v-model="form.nombre" placeholder="Nombre">
+      <input type="text" v-model="form.tag" placeholder="Tag">
+      <input type="text" v-model="form.ciudad" placeholder="Ciudad">
+      <input type="text" v-model="form.main" placeholder="Main">
+    </div>
+
+    <button @click="guardarJugador">Enviar</button>
+
+    <p class="mensaje" v-if="mensaje">{{ mensaje }}</p>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          form: { nombre: "", tag: "", ciudad: "", main: "" },
+          mensaje: ""
+        };
+      },
+      methods: {
+        async guardarJugador() {
+          try {
+            const respuesta = await fetch("/api/jugadores", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(this.form)
+            });
+
+            const data = await respuesta.json();
+            if (!respuesta.ok) {
+              this.mensaje = data.error || "Error al guardar.";
+              return;
+            }
+
+            this.mensaje = "Registro guardado correctamente.";
+
+            this.form = { nombre: "", tag: "", ciudad: "", main: "" };
+          } catch (error) {
+            this.mensaje = "Error de comunicación con el backend.";
+            console.error(error);
+          }
+        }
+      }
+    }).mount("#app");
+  </script>
+</body>
+</html>
